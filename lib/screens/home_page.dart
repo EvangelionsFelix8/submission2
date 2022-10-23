@@ -7,8 +7,9 @@ import 'package:submission1_restaurant_app/screens/main_screen.dart';
 
 import '../api/api_service.dart';
 import '../provider/restaurant_provider.dart';
+import '../provider/search_provider.dart';
 import '../widgets/platform_widget.dart';
-import 'settings_page.dart';
+import 'search_page.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home_page';
@@ -21,14 +22,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _bottomNavIndex = 0;
-  static const String _headlineText = 'Headline';
+  static const String _headlineText = 'Restaurant';
+  final String value = '';
 
   final List<Widget> _listWidget = [
     ChangeNotifierProvider<RestaurantProvider>(
       create: (_) => RestaurantProvider(apiService: ApiService()),
-      child: MainScreen(),
+      child: const MainScreen(),
     ),
-    const SettingsPage(),
+    SearchPage(),
   ];
 
   final List<BottomNavigationBarItem> _bottomNavBarItems = [
@@ -37,8 +39,8 @@ class _HomePageState extends State<HomePage> {
       label: _headlineText,
     ),
     BottomNavigationBarItem(
-      icon: Icon(Platform.isIOS ? CupertinoIcons.settings : Icons.settings),
-      label: SettingsPage.settingsTitle,
+      icon: Icon(Platform.isIOS ? CupertinoIcons.search : Icons.search),
+      label: SearchPage.searchTitle,
     ),
   ];
 

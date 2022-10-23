@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/detail_restaurant.dart';
 import '../models/restaurant.dart';
+import '../models/search.dart';
 
 class ApiService {
   static const String _baseUrl = 'https://restaurant-api.dicoding.dev/';
@@ -30,10 +31,10 @@ class ApiService {
     }
   }
 
-  Future<RestaurantResult> searchRestaurant(String query) async {
+  Future<RestaurantSearchResult> searchRestaurant(String query) async {
     final response = await http.get(Uri.parse("$searchByName?q=$query"));
     if (response.statusCode == 200) {
-      return RestaurantResult.fromJson(json.decode(response.body));
+      return RestaurantSearchResult.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load List Restaurant');
     }

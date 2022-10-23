@@ -1,59 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:submission1_restaurant_app/api/api_service.dart';
+import 'package:submission1_restaurant_app/provider/detail_restaurant_provider.dart';
 
 import '../models/restaurant.dart';
 import '../models/detail_restaurant.dart';
 
-class DetailScreen extends StatefulWidget {
+class DetailScreen extends StatelessWidget {
   static const routeName = '/detail_screen';
 
   final Restaurant restaurant;
   // final RestaurantinDetail restaurantinDetail;
 
-  const DetailScreen({
+  DetailScreen({
     Key? key,
     required this.restaurant,
     // required this.restaurantinDetail,
   }) : super(key: key);
 
-  @override
-  State<DetailScreen> createState() => _DetailScreenState();
-}
-
-class _DetailScreenState extends State<DetailScreen> {
   late Future<RestaurantDetailResult> restaurantFuture;
   // late RestaurantinDetail restaurantinDetail;
 
   @override
-  void initState() {
-    super.initState();
-    restaurantFuture = ApiService().getDetailRestaurant(widget.restaurant.id);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.restaurant.name),
-      ),
-      body: SingleChildScrollView(
-        child: FutureBuilder(
-          future: restaurantFuture,
-          builder: (context, AsyncSnapshot<RestaurantDetailResult> snapshot) {
-            var state = snapshot.connectionState;
-            if (state != ConnectionState.done) {
-              return Container(
+    return ChangeNotifierProvider<DetailRestaurantProvider>(
+      create: (_) => DetailRestaurantProvider(
+          apiService: ApiService(), restaurantId: restaurant.id),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(restaurant.name),
+        ),
+        body: SingleChildScrollView(
+          child: Consumer<DetailRestaurantProvider>(
+            builder: (context, state, _) {
+              if (state.state == ResultState.loading) {
+                return const SizedBox(
                   height: 800,
                   width: 500,
-                  child: Center(child: CircularProgressIndicator()));
-            } else {
-              if (snapshot.hasData) {
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              } else if (state.state == ResultState.hasData) {
                 return Column(
                   children: [
                     Hero(
-                      tag: widget.restaurant.pictureId,
+                      tag: restaurant.pictureId,
                       child: Image.network(
-                          ApiService.imageUrl + widget.restaurant.pictureId),
+                          ApiService.imageUrl + restaurant.pictureId),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10),
@@ -66,7 +60,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           Row(
                             children: [
                               Text(
-                                widget.restaurant.name,
+                                restaurant.name,
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
@@ -82,7 +76,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                     Icons.star,
                                     color: Colors.amber,
                                   ),
-                                  Text(widget.restaurant.rating.toString()),
+                                  Text(restaurant.rating.toString()),
                                 ],
                               )
                             ],
@@ -94,7 +88,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 color: Colors.grey,
                               ),
                               Text(
-                                widget.restaurant.city,
+                                restaurant.city,
                                 style: const TextStyle(
                                   color: Colors.grey,
                                 ),
@@ -118,7 +112,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             height: 8,
                           ),
                           Text(
-                            widget.restaurant.description,
+                            restaurant.description,
                             style: const TextStyle(fontSize: 16),
                           ),
                           const SizedBox(
@@ -139,7 +133,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             width: double.infinity,
                             child: ListView.builder(
                               itemCount:
-                                  snapshot.data!.restaurant.categories.length,
+                                  state.result.restaurant.categories.length,
                               shrinkWrap: false,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
@@ -147,7 +141,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                   margin: const EdgeInsets.only(right: 8),
                                   child: Chip(
                                     labelPadding: const EdgeInsets.all(5),
-                                    label: Text(snapshot.data!.restaurant
+                                    label: Text(state.result.restaurant
                                         .categories[index].name),
                                   ),
                                 );
@@ -181,11 +175,11 @@ class _DetailScreenState extends State<DetailScreen> {
                                 height: 8,
                               ),
                               listFoodDrink(
-                                listCount: snapshot
-                                    .data!.restaurant.menus.foods.length,
+                                listCount:
+                                    state.result.restaurant.menus.foods.length,
                                 harga: "Rp 16.000",
                                 isFood: true,
-                                menus: snapshot.data!.restaurant.menus,
+                                menus: state.result.restaurant.menus,
                               ),
                               const SizedBox(
                                 height: 16,
@@ -201,11 +195,11 @@ class _DetailScreenState extends State<DetailScreen> {
                                 height: 8,
                               ),
                               listFoodDrink(
-                                listCount: snapshot
-                                    .data!.restaurant.menus.foods.length,
+                                listCount:
+                                    state.result.restaurant.menus.foods.length,
                                 harga: "Rp 6.000",
                                 isFood: false,
-                                menus: snapshot.data!.restaurant.menus,
+                                menus: state.result.restaurant.menus,
                               ),
                             ],
                           ),
@@ -214,21 +208,27 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   ],
                 );
-              } else if (snapshot.hasError) {
+              } else if (state.state == ResultState.noData) {
                 return Center(
                   child: Material(
-                    child: Text(
-                      snapshot.error.toString(),
-                    ),
+                    child: Text(state.message),
+                  ),
+                );
+              } else if (state.state == ResultState.error) {
+                return Center(
+                  child: Material(
+                    child: Text(state.message),
                   ),
                 );
               } else {
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: Material(
+                    child: Text(''),
+                  ),
                 );
               }
-            }
-          },
+            },
+          ),
         ),
       ),
     );
@@ -261,8 +261,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     topLeft: Radius.circular(10),
                     bottomLeft: Radius.circular(10),
                   ),
-                  child: Image.network(
-                      ApiService.imageUrl + widget.restaurant.pictureId),
+                  child:
+                      Image.network(ApiService.imageUrl + restaurant.pictureId),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(14),
