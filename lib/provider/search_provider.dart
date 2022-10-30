@@ -9,22 +9,22 @@ enum ResultState { loading, noData, hasData, error }
 
 class SearchProvider extends ChangeNotifier {
   final ApiService apiService;
-  final String query;
 
-  SearchProvider({required this.apiService, required this.query}) {
-    print(query);
-    _fetchSearchRestaurant(query);
+  SearchProvider({required this.apiService}) {
+    fetchSearchRestaurant(query);
   }
 
   late RestaurantSearchResult _restaurantSearchResult;
   late ResultState _state;
   String _message = '';
+  final String _query = '';
 
   String get message => _message;
   RestaurantSearchResult get result => _restaurantSearchResult;
   ResultState get state => _state;
+  String get query => _query;
 
-  Future<dynamic> _fetchSearchRestaurant(String query) async {
+  Future<dynamic> fetchSearchRestaurant(String query) async {
     try {
       _state = ResultState.loading;
       notifyListeners();
@@ -32,7 +32,7 @@ class SearchProvider extends ChangeNotifier {
       if (restaurant.restaurants.isEmpty) {
         _state = ResultState.noData;
         notifyListeners();
-        return _message = 'Empty Data';
+        return _message = 'Restaurant Tidak Ditemukan';
       } else {
         _state = ResultState.hasData;
         notifyListeners();

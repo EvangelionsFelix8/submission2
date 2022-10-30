@@ -10,16 +10,13 @@ class DetailScreen extends StatelessWidget {
   static const routeName = '/detail_screen';
 
   final Restaurant restaurant;
-  // final RestaurantinDetail restaurantinDetail;
 
   DetailScreen({
     Key? key,
     required this.restaurant,
-    // required this.restaurantinDetail,
   }) : super(key: key);
 
   late Future<RestaurantDetailResult> restaurantFuture;
-  // late RestaurantinDetail restaurantinDetail;
 
   @override
   Widget build(BuildContext context) {

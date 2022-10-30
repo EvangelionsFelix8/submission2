@@ -4,11 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:submission1_restaurant_app/screens/main_screen.dart';
+import 'package:submission1_restaurant_app/screens/schedule_page.dart';
 
 import '../api/api_service.dart';
 import '../provider/restaurant_provider.dart';
-import '../provider/search_provider.dart';
+import '../provider/scheduling_provider.dart';
+import '../utils/notification_helper.dart';
 import '../widgets/platform_widget.dart';
+import 'detail_screen.dart';
 import 'search_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,19 +27,28 @@ class _HomePageState extends State<HomePage> {
   int _bottomNavIndex = 0;
   static const String _headlineText = 'Restaurant';
   final String value = '';
+  final NotificationHelper _notificationHelper = NotificationHelper();
 
   final List<Widget> _listWidget = [
     ChangeNotifierProvider<RestaurantProvider>(
       create: (_) => RestaurantProvider(apiService: ApiService()),
       child: const MainScreen(),
     ),
-    SearchPage(),
+    ChangeNotifierProvider<SchedulingProvider>(
+      create: (_) => SchedulingProvider(),
+      child: const SchedulePage(),
+    ),
+    const SearchPage(),
   ];
 
   final List<BottomNavigationBarItem> _bottomNavBarItems = [
     BottomNavigationBarItem(
       icon: Icon(Platform.isIOS ? CupertinoIcons.news : Icons.public),
       label: _headlineText,
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Platform.isIOS ? CupertinoIcons.heart_fill : Icons.favorite),
+      label: SchedulePage.searchTitle,
     ),
     BottomNavigationBarItem(
       icon: Icon(Platform.isIOS ? CupertinoIcons.search : Icons.search),
@@ -80,5 +92,18 @@ class _HomePageState extends State<HomePage> {
       androidBuilder: _buildAndroid,
       iosBuilder: _buildIos,
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationHelper
+        .configureSelectNotificationSubject(DetailScreen.routeName);
+  }
+
+  @override
+  void dispose() {
+    selectNotificationSubject.close();
+    super.dispose();
   }
 }

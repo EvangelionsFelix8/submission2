@@ -6,11 +6,7 @@ import '../widgets/card_restaurant.dart';
 import '../widgets/platform_widget.dart';
 
 class MainScreen extends StatelessWidget {
-  // late Future<RestaurantResult> _restaurant, _restaurantSearch;
-  // bool isSearchActive = false;
-
   const MainScreen({Key? key}) : super(key: key);
-  // late String value = '';
   Widget _buildList() {
     return Consumer<RestaurantProvider>(
       builder: (context, state, _) {
